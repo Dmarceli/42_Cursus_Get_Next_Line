@@ -6,7 +6,7 @@
 /*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/08 16:24:06 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/18 17:04:45 by dmarceli         ###   ########.fr       */
+/*   Updated: 2021/11/19 18:21:30 by dmarceli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,12 @@ char	*line_butcher(char **saved)
 	char	*temp;
 	char	*linhaout;
 
+	temp = NULL;
+	//(void)*temp;
 	nlpos = pos_first_bl(*saved);
-	if (nlpos >= 0)
+	if (nlpos > 0)
 	{
+		free(temp);
 		linhaout = ft_substr(*saved, 0, nlpos + 1);
 		temp = ft_substr(*saved, nlpos + 1, ft_strlen(*saved));
 		free(*saved);
@@ -64,33 +67,41 @@ char	*get_next_line(int fd)
 	if ((read(fd, 0, 0) == -1) || fd < 0 || fd > 1024 || BUFFER_SIZE <= 0)
 		return (NULL);
 	buf = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buf)
+		return (NULL);
 	i = read(fd, buf, BUFFER_SIZE);
-	while (i > 0)
+	while (i >= 0)
 	{
 		buf[i] = '\0';
-		if (saved = NULL)
+		if (saved == NULL)
 			saved = ft_strdup("");
+		saved = ft_strdup(buf);
+		if (pos_first_bl(saved) < 0)
+		{
+			return (saved);
+			break ;
+		}	
+		linhaout = line_butcher(&saved);
 		temp = ft_strjoin(saved, buf);
 		free (saved);
 		saved = temp;
-		line_butcher(&saved);
-		return (line_butcher(&saved));
+		i = read(fd, buf, BUFFER_SIZE);
+		return (linhaout);
 	}
-	return (linhaout);
+	return (line_butcher(&saved));
 }
 
-int	main(int argc, char **argv)
-{
-	int		fd;
-	char	*linha;
-
-	linha = "";
-	(void)argc;
-	fd = open((argv[1]), O_RDONLY);
-	while (linha)
-	{
-		linha = get_next_line(fd);
-		if (linha)
-			printf("%s\n", linha);
-	}
-}
+// int main()
+// {
+// 	int fd;
+// 	char *line;
+// 	int i = 0;
+	
+// 	fd = open("41_with_nl", O_RDONLY);
+// 	while (i < 2)
+// 	{
+// 	line = get_next_line (fd);
+// 	printf("%s" , line);
+// 	i++;
+// 	}
+// }

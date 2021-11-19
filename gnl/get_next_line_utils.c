@@ -6,7 +6,7 @@
 /*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/08 15:26:44 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/13 22:13:18 by dmarceli         ###   ########.fr       */
+/*   Updated: 2021/11/19 14:36:46 by dmarceli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,35 +54,21 @@ char	*ft_strjoin(char const *s1, char const *s2)
 
 char	*ft_strdup(const char *s1)
 {
-	char	*str;
+	int		i;
+	char	*temp;
 
-	str = (char *)malloc(sizeof(*s1) * ft_strlen(s1) + 1);
-	if (!str)
-		return (0);
-	ft_strlcpy(str, s1, ft_strlen(s1) + 1);
-	str[ft_strlen(s1)] = '\0';
-	return (str);
-}
-
-size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
-{
-	size_t	i;
-	size_t	s;
-
-	s = 0;
+	i = ft_strlen(s1);
+	temp = (char *)malloc(sizeof(char) * (i + 1));
+	if (!temp)
+		return (NULL);
 	i = 0;
-	while (src[s])
-		s++;
-	if (dstsize != 0)
+	while (s1[i])
 	{
-		while (src[i] != '\0' && i < (dstsize - 1))
-		{
-			dst[i] = src[i];
-			i++;
-		}
-		dst[i] = '\0';
+		temp[i] = s1[i];
+		i++;
 	}
-	return (s);
+	temp[i] = '\0';
+	return (temp);
 }
 
 char	*ft_substr(const char *s, unsigned int start, size_t len)
