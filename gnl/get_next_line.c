@@ -6,7 +6,7 @@
 /*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/08 16:24:06 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/19 18:21:30 by dmarceli         ###   ########.fr       */
+/*   Updated: 2021/11/25 22:28:22 by dmarceli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,8 @@ int	pos_first_bl(char *s)
 		{	
 			position = i;
 			break ;
-		}	
-		else
-			i++;
+		}
+		i++;
 	}
 	return (position);
 }
@@ -40,68 +39,78 @@ char	*line_butcher(char **saved)
 	char	*temp;
 	char	*linhaout;
 
+	linhaout = NULL;
 	temp = NULL;
-	//(void)*temp;
+	if (*saved == NULL)
+		return (NULL);
 	nlpos = pos_first_bl(*saved);
-	if (nlpos > 0)
+	if (nlpos == -1)
+		return (*saved);
+	linhaout = ft_substr(*saved, 0, nlpos + 1);
+	if (nlpos + 1 != (int)ft_strlen(*saved))
 	{
-		free(temp);
-		linhaout = ft_substr(*saved, 0, nlpos + 1);
-		temp = ft_substr(*saved, nlpos + 1, ft_strlen(*saved));
-		free(*saved);
+		temp = ft_substr(*saved, nlpos + 1, ft_strlen(*saved) - (nlpos + 1));
+		if (*saved)
+		{
+			free(*saved);
+			*saved = NULL;
+		}
 		*saved = temp;
-		return (linhaout);
 	}
-	return (*saved);
+	else
+	{
+		if (*saved)
+		{	
+			free (*saved);
+			*saved = NULL;
+		}
+	}
+	return (linhaout);
 }
 
 char	*get_next_line(int fd)
 {
-	char				*linhaout;
-	static char			*saved;
-	char				*buf;
+	static char			*saved[4096];
+	char				buf[BUFFER_SIZE + 1];
 	int					i;
 	char				*temp;
 
-	i = 0;
-	if ((read(fd, 0, 0) == -1) || fd < 0 || fd > 1024 || BUFFER_SIZE <= 0)
-		return (NULL);
-	buf = malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!buf)
+	if (BUFFER_SIZE <= 0 || fd < 0 || fd > 4096)
 		return (NULL);
 	i = read(fd, buf, BUFFER_SIZE);
-	while (i >= 0)
+	while (i > 0)
 	{
+		if (saved[fd] == NULL)
+			saved[fd] = ft_strdup("");
 		buf[i] = '\0';
-		if (saved == NULL)
-			saved = ft_strdup("");
-		saved = ft_strdup(buf);
-		if (pos_first_bl(saved) < 0)
+		temp = ft_strjoin(saved[fd], buf);
+		//free(buf);
+		if (*saved[fd])
 		{
-			return (saved);
+			free(saved[fd]);
+			saved[fd] = NULL;
+		}
+		saved[fd] = ft_strdup(temp);
+		if (temp)
+			free (temp);
+		if (pos_first_bl(saved[fd]) >= 0)
 			break ;
-		}	
-		linhaout = line_butcher(&saved);
-		temp = ft_strjoin(saved, buf);
-		free (saved);
-		saved = temp;
 		i = read(fd, buf, BUFFER_SIZE);
-		return (linhaout);
 	}
-	return (line_butcher(&saved));
+	//printf("%p,%p,%p", saved, buf,temp);
+	return (line_butcher(&saved[fd]));
 }
 
-// int main()
-// {
-// 	int fd;
-// 	char *line;
-// 	int i = 0;
-	
-// 	fd = open("41_with_nl", O_RDONLY);
-// 	while (i < 2)
-// 	{
-// 	line = get_next_line (fd);
-// 	printf("%s" , line);
-// 	i++;
-// 	}
-// }
+int main()
+{
+	int fd;
+	char *line;
+	int i = 0;
+	fd = open("big_line_no_nl", O_RDONLY);
+	while (i < 10)
+	{
+	line = get_next_line (fd);
+	printf("%s" , line);
+	i++;
+	}
+}
