@@ -6,7 +6,7 @@
 /*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/08 16:24:06 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/25 22:28:22 by dmarceli         ###   ########.fr       */
+/*   Updated: 2021/11/26 18:47:37 by dmarceli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,7 @@ char	*line_butcher(char **saved)
 	if (nlpos + 1 != (int)ft_strlen(*saved))
 	{
 		temp = ft_substr(*saved, nlpos + 1, ft_strlen(*saved) - (nlpos + 1));
-		if (*saved)
-		{
-			free(*saved);
-			*saved = NULL;
-		}
+		free(*saved);
 		*saved = temp;
 	}
 	else
@@ -71,11 +67,14 @@ char	*line_butcher(char **saved)
 char	*get_next_line(int fd)
 {
 	static char			*saved[4096];
-	char				buf[BUFFER_SIZE + 1];
+	char				*buf;
 	int					i;
 	char				*temp;
 
 	if (BUFFER_SIZE <= 0 || fd < 0 || fd > 4096)
+		return (NULL);
+	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf)
 		return (NULL);
 	i = read(fd, buf, BUFFER_SIZE);
 	while (i > 0)
@@ -84,20 +83,15 @@ char	*get_next_line(int fd)
 			saved[fd] = ft_strdup("");
 		buf[i] = '\0';
 		temp = ft_strjoin(saved[fd], buf);
-		//free(buf);
-		if (*saved[fd])
-		{
+		if (saved[fd])
 			free(saved[fd]);
-			saved[fd] = NULL;
-		}
-		saved[fd] = ft_strdup(temp);
-		if (temp)
-			free (temp);
+		saved[fd] = temp;
 		if (pos_first_bl(saved[fd]) >= 0)
 			break ;
 		i = read(fd, buf, BUFFER_SIZE);
 	}
-	//printf("%p,%p,%p", saved, buf,temp);
+	free (buf);
+	//printf("%p,%p,%p" , saved[fd], buf, temp);
 	return (line_butcher(&saved[fd]));
 }
 
@@ -107,7 +101,7 @@ int main()
 	char *line;
 	int i = 0;
 	fd = open("big_line_no_nl", O_RDONLY);
-	while (i < 10)
+	while (i < 7)
 	{
 	line = get_next_line (fd);
 	printf("%s" , line);

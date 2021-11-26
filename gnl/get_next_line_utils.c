@@ -6,7 +6,7 @@
 /*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/08 15:26:44 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/25 22:11:18 by dmarceli         ###   ########.fr       */
+/*   Updated: 2021/11/26 18:24:47 by dmarceli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,30 +71,30 @@ char	*ft_strdup(char *s1)
 	return (temp);
 }
 
-char	*ft_substr(char *s, unsigned int start, size_t len)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	char	*substr;
 	size_t	i;
 	size_t	j;
+	size_t	s_len;
+	char	*new;
 
 	if (!s)
 		return (NULL);
-	if (ft_strlen(s) < start)
-		return (ft_strdup(""));
-	if (ft_strlen(s) < len)
-		substr = (char *)malloc(sizeof(char) * (ft_strlen(s) + 1));
+	s_len = ft_strlen((char *)s);
+	if (s_len < len)
+		new = (char *)malloc(sizeof(char) * (s_len + 1));
 	else
-		substr = (char *)malloc((len + 1) * sizeof(char));
-	if (!substr)
+		new = (char *)malloc(sizeof(char) * (len + 1));
+	if (!new)
 		return (NULL);
 	i = 0;
 	j = 0;
 	while (s[i])
 	{
 		if (i >= start && j < len)
-			substr[j++] = s[i];
+			new[j++] = s[i];
 		i++;
 	}
-	substr[j] = '\0';
-	return (substr);
+	new[j] = '\0';
+	return (new);
 }
