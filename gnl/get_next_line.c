@@ -41,7 +41,7 @@ char	*line_butcher(char **saved)
 
 	linhaout = NULL;
 	temp = NULL;
-	if (*saved == NULL)
+	if (!*saved || **saved == '\0')
 		return (NULL);
 	nlpos = pos_first_bl(*saved);
 	if (nlpos == -1)
@@ -76,22 +76,23 @@ char	*get_next_line(int fd)
 	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buf)
 		return (NULL);
+	// if (i == 0)
+	// 	return(NULL);
 	i = read(fd, buf, BUFFER_SIZE);
 	while (i > 0)
 	{
+		buf[i] = '\0';
 		if (saved[fd] == NULL)
 			saved[fd] = ft_strdup("");
-		buf[i] = '\0';
 		temp = ft_strjoin(saved[fd], buf);
-		if (saved[fd])
-			free(saved[fd]);
+		free(saved[fd]);
 		saved[fd] = temp;
-		if (pos_first_bl(saved[fd]) >= 0)
+		if ((pos_first_bl(saved[fd]) >= 0))
 			break ;
 		i = read(fd, buf, BUFFER_SIZE);
+		//printf("%d\n" , i);
 	}
 	free (buf);
-	//printf("%p,%p,%p" , saved[fd], buf, temp);
 	return (line_butcher(&saved[fd]));
 }
 
@@ -101,7 +102,7 @@ int main()
 	char *line;
 	int i = 0;
 	fd = open("big_line_no_nl", O_RDONLY);
-	while (i < 7)
+	while (i < 90)
 	{
 	line = get_next_line (fd);
 	printf("%s" , line);
