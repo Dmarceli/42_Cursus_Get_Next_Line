@@ -1,27 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: dmarceli <dmarceli@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/08 16:24:06 by dmarceli          #+#    #+#             */
-/*   Updated: 2021/11/26 18:47:37 by dmarceli         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
 
-int	pos_first_bl(char *s)
+int nlpos(char *s)
 {
 	int		i;
-	int		comprimento;
 	int		position;
 
 	position = -1;
 	i = 0;
-	comprimento = ft_strlen(s);
-	while (i <= comprimento)
+	while (i <= (int)ft_strlen(s))
 	{
 		if (s[i] == '\n')
 		{	
@@ -33,67 +19,59 @@ int	pos_first_bl(char *s)
 	return (position);
 }
 
-char	*line_butcher(char **saved)
+char *ft_processor(char **saved)
 {
-	int		nlpos;
-	char	*temp;
-	char	*linhaout;
+    char *out;
+    char *data;
+    int nl;
 
-	linhaout = NULL;
-	temp = NULL;
-	if (!*saved || **saved == '\0')
-		return (NULL);
-	nlpos = pos_first_bl(*saved);
-	if (nlpos == -1)
-		return (*saved);
-	linhaout = ft_substr(*saved, 0, nlpos + 1);
-	if (nlpos + 1 != (int)ft_strlen(*saved))
-	{
-		temp = ft_substr(*saved, nlpos + 1, ft_strlen(*saved) - (nlpos + 1));
-		free(*saved);
-		*saved = temp;
-	}
-	else
-	{
-		if (*saved)
-		{	
-			free (*saved);
-			*saved = NULL;
-		}
-	}
-	return (linhaout);
+    if (!*saved || **saved == '\0')
+		return (0);
+    nl = nlpos(*saved);
+    if (nl > -1)
+    {
+        out = ft_substr(*saved, 0 , nl + 1);
+        data = ft_substr(*saved , nl + 1, ft_strlen(*saved));
+        free (*saved);
+        *saved = data;
+        if (**saved != '\0')
+		    return (out);
+    }
+    else
+        out = ft_strdup(*saved);
+    free (*saved);
+    *saved = NULL;
+    return(out);
 }
 
-char	*get_next_line(int fd)
+char *get_next_line(int fd)
 {
-	static char			*saved[4096];
-	char				*buf;
-	int					i;
-	char				*temp;
+    static char *saved[OPEN_MAX];
+    char        buf[BUFFER_SIZE + 1];
+    int         read_bytes;
+    char        *concat;
 
-	if (BUFFER_SIZE <= 0 || fd < 0 || fd > 4096)
-		return (NULL);
-	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buf)
-		return (NULL);
-	// if (i == 0)
-	// 	return(NULL);
-	i = read(fd, buf, BUFFER_SIZE);
-	while (i > 0)
-	{
-		buf[i] = '\0';
-		if (saved[fd] == NULL)
-			saved[fd] = ft_strdup("");
-		temp = ft_strjoin(saved[fd], buf);
-		free(saved[fd]);
-		saved[fd] = temp;
-		if ((pos_first_bl(saved[fd]) >= 0))
-			break ;
-		i = read(fd, buf, BUFFER_SIZE);
-		//printf("%d\n" , i);
-	}
-	free (buf);
-	return (line_butcher(&saved[fd]));
+    concat = NULL;
+    if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX)
+        return (0);
+    // buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	// if (!buf)
+	// 	return (NULL);
+    read_bytes = read(fd, buf, BUFFER_SIZE);
+    while (read_bytes > 0)
+    {
+        buf[read_bytes] = '\0';
+        if (saved[fd] == NULL)
+            saved[fd] = ft_strdup("");
+        concat = ft_strjoin(saved[fd], buf);
+        free (saved[fd]);
+        saved[fd] = concat;
+        if (nlpos(saved[fd]) >= 0)
+            break;
+        read_bytes = read(fd, buf, BUFFER_SIZE);
+    }
+    //free (buf);
+    return(ft_processor(&saved[fd]));
 }
 
 int main()
@@ -102,7 +80,7 @@ int main()
 	char *line;
 	int i = 0;
 	fd = open("big_line_no_nl", O_RDONLY);
-	while (i < 90)
+	while (i < 1)
 	{
 	line = get_next_line (fd);
 	printf("%s" , line);
